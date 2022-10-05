@@ -3,7 +3,7 @@ $scheduling = \Wpae\Scheduling\Scheduling::create();
 ?>
 <span class="wpai-no-license" <?php if ($scheduling->checkLicense()) { ?> style="display: none;" <?php } ?> >
 
-    <a href="#" style="z-index: 1000;" class="wpallexport-help help_scheduling"
+    <a href="#" style="z-index: 1000; margin-top: -4px; margin-left: 0;" class="wpallexport-help help_scheduling"
        title="Automatic Scheduling is a paid service from Soflyy. Click for more info.">
 
     </a>

@@ -7,7 +7,7 @@ Author: Arshid
 Author URI: http://ciphercoin.com/
 Text Domain: contact-form-cfdb7
 Domain Path: /languages/
-Version: 1.2.4.11
+Version: 1.2.6.4
 */
 
 function cfdb7_create_table(){
@@ -36,6 +36,9 @@ function cfdb7_create_table(){
     $cfdb7_dirname = $upload_dir['basedir'].'/cfdb7_uploads';
     if ( ! file_exists( $cfdb7_dirname ) ) {
         wp_mkdir_p( $cfdb7_dirname );
+        $fp = fopen( $cfdb7_dirname.'/index.php', 'w');
+        fwrite($fp, "<?php \n\t // Silence is golden.");
+        fclose( $fp );
     }
     add_option( 'cfdb7_view_install_date', date('Y-m-d G:i:s'), '', 'yes');
 
@@ -64,6 +67,25 @@ function cfdb7_on_activate( $network_wide ){
 register_activation_hook( __FILE__, 'cfdb7_on_activate' );
 
 
+function cfdb7_upgrade_function( $upgrader_object, $options ) {
+
+    $upload_dir    = wp_upload_dir();
+    $cfdb7_dirname = $upload_dir['basedir'].'/cfdb7_uploads';
+
+    if ( file_exists( $cfdb7_dirname.'/index.php' ) ) return;
+        
+    if ( file_exists( $cfdb7_dirname ) ) {
+        $fp = fopen( $cfdb7_dirname.'/index.php', 'w');
+        fwrite($fp, "<?php \n\t // Silence is golden.");
+        fclose( $fp );
+    }
+
+}
+
+add_action( 'upgrader_process_complete', 'cfdb7_upgrade_function',10, 2);
+
+
+
 function cfdb7_on_deactivate() {
 
 	// Remove custom capability from all roles
@@ -86,26 +108,37 @@ function cfdb7_before_send_mail( $form_tag ) {
     $cfdb7_dirname = $upload_dir['basedir'].'/cfdb7_uploads';
     $time_now      = time();
 
-    $form = WPCF7_Submission::get_instance();
+    $submission   = WPCF7_Submission::get_instance();
+    $contact_form = $submission->get_contact_form();
+    $tags_names   = array();
+    $strict_keys  = apply_filters('cfdb7_strict_keys', false);  
 
-    if ( $form ) {
+    if ( $submission ) {
 
-        $black_list   = array('_wpcf7', '_wpcf7_version', '_wpcf7_locale', '_wpcf7_unit_tag',
-        '_wpcf7_is_ajax_call','cfdb7_name', '_wpcf7_container_post','_wpcf7cf_hidden_group_fields',
-        '_wpcf7cf_hidden_groups', '_wpcf7cf_visible_groups', '_wpcf7cf_options','g-recaptcha-response');
+        $allowed_tags = array();
 
-        $data           = $form->get_posted_data();
-        $files          = $form->uploaded_files();
-        $uploaded_files = array();
+        if( $strict_keys ){
+            $tags  = $contact_form->scan_form_tags();
+            foreach( $tags as $tag ){
+                if( ! empty($tag->name) ) $tags_names[] = $tag->name;
+            }
+            $allowed_tags = $tags_names;
+        }
 
-        $rm_underscore  = apply_filters('cfdb7_remove_underscore_data', true); 
+        $not_allowed_tags = apply_filters( 'cfdb7_not_allowed_tags', array( 'g-recaptcha-response' ) );
+        $allowed_tags     = apply_filters( 'cfdb7_allowed_tags', $allowed_tags );
+        $data             = $submission->get_posted_data();
+        $files            = $submission->uploaded_files();
+        $uploaded_files   = array();
+
 
         foreach ($_FILES as $file_key => $file) {
             array_push($uploaded_files, $file_key);
         }
-
         foreach ($files as $file_key => $file) {
-            copy($file, $cfdb7_dirname.'/'.$time_now.'-'.basename($file));
+            $file = is_array( $file ) ? reset( $file ) : $file;
+            if( empty($file) ) continue;
+            copy($file, $cfdb7_dirname.'/'.$time_now.'-'.$file_key.'-'.basename($file));
         }
 
         $form_data   = array();
@@ -113,25 +146,23 @@ function cfdb7_before_send_mail( $form_tag ) {
         $form_data['cfdb7_status'] = 'unread';
         foreach ($data as $key => $d) {
             
-            $matches = array();
-            if( $rm_underscore ) preg_match('/^_.*$/m', $key, $matches);
+            if( $strict_keys && !in_array($key, $allowed_tags) ) continue;
 
-            if ( !in_array($key, $black_list ) && !in_array($key, $uploaded_files ) && empty( $matches[0] ) ) {
+            if ( !in_array($key, $not_allowed_tags ) && !in_array($key, $uploaded_files )  ) {
 
                 $tmpD = $d;
 
                 if ( ! is_array($d) ){
-
                     $bl   = array('\"',"\'",'/','\\','"',"'");
                     $wl   = array('&quot;','&#039;','&#047;', '&#092;','&quot;','&#039;');
-
                     $tmpD = str_replace($bl, $wl, $tmpD );
                 }
 
                 $form_data[$key] = $tmpD;
             }
             if ( in_array($key, $uploaded_files ) ) {
-                $file_name = isset( $files[ $key ] ) ? $time_now.'-'.basename( $files[ $key ])  : ''; 
+                $file = is_array( $files[ $key ] ) ? reset( $files[ $key ] ) : $files[ $key ];
+                $file_name = empty( $file ) ? '' : $time_now.'-'.$key.'-'.basename( $file ); 
                 $form_data[$key.'cfdb7_file'] = $file_name;
             }
         }
@@ -180,10 +211,10 @@ function cfdb7_init(){
 
         do_action( 'cfdb7_admin_init' );
 
-        $csv = new Export_CSV();
+        $csv = new CFDB7_Export_CSV();
         if( isset($_REQUEST['csv']) && ( $_REQUEST['csv'] == true ) && isset( $_REQUEST['nonce'] ) ) {
 
-            $nonce  = filter_input( INPUT_GET, 'nonce', FILTER_SANITIZE_STRING );
+            $nonce  = $_REQUEST['nonce'];
 
             if ( ! wp_verify_nonce( $nonce, 'dnonce' ) ) wp_die('Invalid nonce..!!');
 
@@ -213,8 +244,13 @@ function cfdb7_admin_notice() {
 
         echo '<div class="updated"><p>';
 
-        printf(__( 'Awesome, you\'ve been using <a href="admin.php?page=cfdb7-list.php">Contact Form CFDB7</a> for more than 1 week. May we ask you to give it a 5-star rating on WordPress? | <a href="%2$s" target="_blank">Ok, you deserved it</a> | <a href="%1$s">I already did</a> | <a href="%1$s">No, not good enough</a>', 'contact-form-cfdb7' ), '?cfdb7-ignore-notice=0',
-        'https://wordpress.org/plugins/contact-form-cfdb7/');
+        printf(
+            __( 'Awesome, you\'ve been using <a href="admin.php?page=cfdb7-list.php">Contact Form CFDB7</a> for more than 1 week. May we ask you to give it a 5-star rating on WordPress? | <a href="%2$s" target="_blank">Ok, you deserved it</a> | <a href="%1$s">I already did</a> | <a href="%1$s">No, not good enough</a>', 
+		        'contact-form-cfdb7' 
+		    ), 
+            add_query_arg('cfdb7-ignore-notice', 0, admin_url()),
+            'https://wordpress.org/plugins/contact-form-cfdb7/'
+        );
         echo "</p></div>";
     }
 }
