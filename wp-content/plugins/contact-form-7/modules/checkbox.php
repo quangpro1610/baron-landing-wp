@@ -52,6 +52,12 @@ function wpcf7_checkbox_form_tag_handler( $tag ) {
 	$atts['class'] = $tag->get_class_option( $class );
 	$atts['id'] = $tag->get_id_option();
 
+	if ( $validation_error ) {
+		$atts['aria-describedby'] = wpcf7_get_validation_error_reference(
+			$tag->name
+		);
+	}
+
 	$tabindex = $tag->get_option( 'tabindex', 'signed_int', true );
 
 	if ( false !== $tabindex ) {
@@ -151,8 +157,7 @@ function wpcf7_checkbox_form_tag_handler( $tag ) {
 
 				if ( wpcf7_is_posted()
 				and isset( $_POST[$free_text_name] ) ) {
-					$free_text_atts['value'] = wp_unslash(
-						$_POST[$free_text_name] );
+					$free_text_atts['value'] = wp_unslash( $_POST[$free_text_name] );
 				}
 
 				$free_text_atts = wpcf7_format_atts( $free_text_atts );
@@ -167,36 +172,37 @@ function wpcf7_checkbox_form_tag_handler( $tag ) {
 		$html .= $item;
 	}
 
-	$atts = wpcf7_format_atts( $atts );
-
 	$html = sprintf(
-		'<span class="wpcf7-form-control-wrap %1$s"><span %2$s>%3$s</span>%4$s</span>',
-		sanitize_html_class( $tag->name ), $atts, $html, $validation_error
+		'<span class="wpcf7-form-control-wrap" data-name="%1$s"><span %2$s>%3$s</span>%4$s</span>',
+		esc_attr( $tag->name ),
+		wpcf7_format_atts( $atts ),
+		$html,
+		$validation_error
 	);
 
 	return $html;
 }
 
 
-/* Validation filter */
+add_action(
+	'wpcf7_swv_create_schema',
+	'wpcf7_swv_add_checkbox_rules',
+	10, 2
+);
 
-add_filter( 'wpcf7_validate_checkbox',
-	'wpcf7_checkbox_validation_filter', 10, 2 );
-add_filter( 'wpcf7_validate_checkbox*',
-	'wpcf7_checkbox_validation_filter', 10, 2 );
-add_filter( 'wpcf7_validate_radio',
-	'wpcf7_checkbox_validation_filter', 10, 2 );
+function wpcf7_swv_add_checkbox_rules( $schema, $contact_form ) {
+	$tags = $contact_form->scan_form_tags( array(
+		'type' => array( 'checkbox*', 'radio' ),
+	) );
 
-function wpcf7_checkbox_validation_filter( $result, $tag ) {
-	$name = $tag->name;
-	$is_required = $tag->is_required() || 'radio' == $tag->type;
-	$value = isset( $_POST[$name] ) ? (array) $_POST[$name] : array();
-
-	if ( $is_required and empty( $value ) ) {
-		$result->invalidate( $tag, wpcf7_get_message( 'invalid_required' ) );
+	foreach ( $tags as $tag ) {
+		$schema->add_rule(
+			wpcf7_swv_create_rule( 'required', array(
+				'field' => $tag->name,
+				'error' => wpcf7_get_message( 'invalid_required' ),
+			) )
+		);
 	}
-
-	return $result;
 }
 
 
@@ -261,7 +267,7 @@ function wpcf7_tag_generator_checkbox( $contact_form, $args = '' ) {
 		<textarea name="values" class="values" id="<?php echo esc_attr( $args['content'] . '-values' ); ?>"></textarea>
 		<label for="<?php echo esc_attr( $args['content'] . '-values' ); ?>"><span class="description"><?php echo esc_html( __( "One option per line.", 'contact-form-7' ) ); ?></span></label><br />
 		<label><input type="checkbox" name="label_first" class="option" /> <?php echo esc_html( __( 'Put a label first, a checkbox last', 'contact-form-7' ) ); ?></label><br />
-		<label><input type="checkbox" name="use_label_element" class="option" /> <?php echo esc_html( __( 'Wrap each item with label element', 'contact-form-7' ) ); ?></label>
+		<label><input type="checkbox" name="use_label_element" class="option" checked="checked" /> <?php echo esc_html( __( 'Wrap each item with label element', 'contact-form-7' ) ); ?></label>
 <?php if ( 'checkbox' == $type ) : ?>
 		<br /><label><input type="checkbox" name="exclusive" class="option" /> <?php echo esc_html( __( 'Make checkboxes exclusive', 'contact-form-7' ) ); ?></label>
 <?php endif; ?>

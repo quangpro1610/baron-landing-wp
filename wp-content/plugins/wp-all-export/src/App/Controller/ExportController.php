@@ -43,7 +43,8 @@ class ExportController extends BaseController
             $id = intval($_GET['id']);
             $export = new \PMXE_Export_Record();
             if ($export->getById($id)->isEmpty()) { // specified import is not found
-                wp_redirect(add_query_arg('page', 'pmxe-admin-manage', admin_url('admin.php'))); die();
+                wp_redirect(esc_url_raw(add_query_arg('page', 'pmxe-admin-manage', admin_url('admin.php'))));
+                die();
             }
 
             $exportData = $export->options['google_merchants_post_data'];
