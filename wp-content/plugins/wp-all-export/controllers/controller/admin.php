@@ -27,7 +27,7 @@ abstract class PMXE_Controller_Admin extends PMXE_Controller {
 
 		$remove = array_diff(array_keys($_GET), $this->baseUrlParamNames);
 		if ($remove) {
-			$this->baseUrl = remove_query_arg($remove);
+			$this->baseUrl = esc_url_raw(remove_query_arg($remove));
 		} else {
 			$this->baseUrl = $_SERVER['REQUEST_URI'];
 		}
@@ -44,6 +44,7 @@ abstract class PMXE_Controller_Admin extends PMXE_Controller {
 		wp_enqueue_style('jquery-ui', PMXE_ROOT_URL . '/static/js/jquery/css/redmond/jquery-ui.css', array('media-views'));
 		wp_enqueue_style('jquery-tipsy', PMXE_ROOT_URL . '/static/js/jquery/css/smoothness/jquery.tipsy.css', array('media-views'));
 		wp_enqueue_style('pmxe-admin-style', PMXE_ROOT_URL . '/static/css/admin.css',array('media-views'), PMXE_VERSION.PMXE_ASSETS_VERSION);
+		wp_enqueue_style('pmxe-admin-style-upgrade-notice', PMXE_ROOT_URL . '/static/css/upgrade-notice.css',array('media-views'), PMXE_VERSION.PMXE_ASSETS_VERSION);
 		wp_enqueue_style('pmxe-admin-style-ie', PMXE_ROOT_URL . '/static/css/admin-ie.css', array('media-views'));
 		wp_enqueue_style('jquery-select2', PMXE_ROOT_URL . '/static/js/jquery/css/select2/select2.css', array('media-views'));
 		wp_enqueue_style('jquery-select2', PMXE_ROOT_URL . '/static/js/jquery/css/select2/select2-bootstrap.css', array('media-views'));
@@ -51,6 +52,7 @@ abstract class PMXE_Controller_Admin extends PMXE_Controller {
 		wp_enqueue_style('jquery-codemirror', PMXE_ROOT_URL . '/static/codemirror/codemirror.css', array('media-views'), PMXE_VERSION.PMXE_ASSETS_VERSION);
 		wp_enqueue_style('jquery-timepicker', PMXE_ROOT_URL . '/static/js/jquery/css/timepicker/jquery.timepicker.css', array('media-views'), PMXE_VERSION.PMXE_ASSETS_VERSION);
 		wp_enqueue_style('pmxe-angular-scss', PMXE_ROOT_URL . '/dist/styles.css', array('media-views'), PMXE_VERSION.PMXE_ASSETS_VERSION);
+        wp_enqueue_style('jquery-codemirror', PMXE_ROOT_URL . '/static/css/codemirror.css', array(), PMXE_VERSION);
 
 		$wp_styles->add_data('pmxe-admin-style-ie', 'conditional', 'lte IE 7');
 		wp_enqueue_style('wp-pointer');		
@@ -68,22 +70,15 @@ abstract class PMXE_Controller_Admin extends PMXE_Controller {
 			wp_enqueue_style('pmxe-admin-style-color', PMXE_ROOT_URL . '/static/css/admin-colors-' . $scheme_color . '.css', array('media-views'));
 		}
 
-        wp_deregister_script('wp-codemirror');
-
         wp_enqueue_script('jquery-ui-datepicker', PMXE_ROOT_URL . '/static/js/jquery/ui.datepicker.js', 'jquery-ui-core');
-		wp_enqueue_script('jquery-tipsy', PMXE_ROOT_URL . '/static/js/jquery/jquery.tipsy.js', 'jquery');
+		wp_enqueue_script('tipsy', PMXE_ROOT_URL . '/static/js/jquery/jquery.tipsy.js', 'jquery', PMXE_VERSION.PMXE_ASSETS_VERSION);
 		wp_enqueue_script('jquery-pmxe-nestable', PMXE_ROOT_URL . '/static/js/jquery/jquery.mjs.pmxe_nestedSortable.js', array('jquery', 'jquery-ui-dialog', 'jquery-ui-sortable', 'jquery-ui-draggable', 'jquery-ui-droppable', 'jquery-ui-tabs', 'jquery-ui-progressbar'));
 		wp_enqueue_script('jquery-select2', PMXE_ROOT_URL . '/static/js/jquery/select2.min.js', 'jquery');
 		wp_enqueue_script('jquery-ddslick', PMXE_ROOT_URL . '/static/js/jquery/jquery.ddslick.min.js', 'jquery');
 		wp_enqueue_script('jquery-chosen', PMXE_ROOT_URL . '/static/js/jquery/chosen.jquery.js', 'jquery');
-		wp_enqueue_script('jquery-codemirror', PMXE_ROOT_URL . '/static/codemirror/codemirror.js', array(), PMXE_VERSION.PMXE_ASSETS_VERSION);
-		wp_enqueue_script('jquery-codemirror-matchbrackets', PMXE_ROOT_URL . '/static/codemirror/matchbrackets.js', array('jquery-codemirror'), PMXE_VERSION.PMXE_ASSETS_VERSION);
-		wp_enqueue_script('jquery-codemirror-htmlmixed', PMXE_ROOT_URL . '/static/codemirror/htmlmixed.js', array('jquery-codemirror-matchbrackets'), PMXE_VERSION.PMXE_ASSETS_VERSION);
-		wp_enqueue_script('jquery-codemirror-xml', PMXE_ROOT_URL . '/static/codemirror/xml.js', array('jquery-codemirror-htmlmixed'), PMXE_VERSION.PMXE_ASSETS_VERSION);
-		wp_enqueue_script('jquery-codemirror-javascript', PMXE_ROOT_URL . '/static/codemirror/javascript.js', array('jquery-codemirror-xml'), PMXE_VERSION.PMXE_ASSETS_VERSION);
-		wp_enqueue_script('jquery-codemirror-clike', PMXE_ROOT_URL . '/static/codemirror/clike.js', array('jquery-codemirror-javascript'), PMXE_VERSION.PMXE_ASSETS_VERSION);
-		wp_enqueue_script('jquery-codemirror-php', PMXE_ROOT_URL . '/static/codemirror/php.js', array('jquery-codemirror-clike'), PMXE_VERSION.PMXE_ASSETS_VERSION);
-		wp_enqueue_script('jquery-codemirror-autorefresh', PMXE_ROOT_URL . '/static/codemirror/autorefresh.js', array('jquery-codemirror'), PMXE_VERSION.PMXE_ASSETS_VERSION);
+
+        add_action("admin_enqueue_scripts", [$this, 'add_admin_scripts']);
+
 		wp_enqueue_script('jquery-timepicker', PMXE_ROOT_URL . '/static/js/jquery/jquery.timepicker.js', array('jquery'), PMXE_VERSION.PMXE_ASSETS_VERSION);
 
 		wp_enqueue_script('wp-pointer');
@@ -91,12 +86,20 @@ abstract class PMXE_Controller_Admin extends PMXE_Controller {
 		/* load plupload scripts */
         wp_enqueue_script('pmxe-admin-script', PMXE_ROOT_URL . '/static/js/admin.js', array('jquery', 'jquery-ui-dialog', 'jquery-ui-datepicker', 'jquery-ui-draggable', 'jquery-ui-droppable', 'jquery-ui-core', 'jquery-ui-widget', 'jquery-ui-position', 'jquery-ui-autocomplete' ), PMXE_VERSION);
 		wp_enqueue_script('pmxe-admin-validate-braces', PMXE_ROOT_URL . '/static/js/validate-braces.js', array('pmxe-admin-script' ), PMXE_VERSION.PMXE_ASSETS_VERSION);
+		wp_enqueue_script('pmxe-admin-update-notice', PMXE_ROOT_URL . '/static/js/upgrade-notice.js', array('pmxe-admin-script' ), PMXE_VERSION.PMXE_ASSETS_VERSION);
 
 		if(getenv('WPAE_DEV')) {
 			wp_enqueue_script('pmxe-angular-app', PMXE_ROOT_URL . '/dist/app.js', array('jquery'), PMXE_VERSION.PMXE_ASSETS_VERSION);
 		} else {
 			wp_enqueue_script('pmxe-angular-app', PMXE_ROOT_URL . '/dist/app.min.js', array('jquery'), PMXE_VERSION.PMXE_ASSETS_VERSION);
 		}
+	}
+
+    public function add_admin_scripts() {
+
+        $cm_settings['codeEditor'] = wp_enqueue_code_editor(['type' => 'php']);
+        wp_localize_script('jquery', 'wpae_cm_settings', $cm_settings);
+
 	}
 	
 	/**
@@ -109,22 +112,6 @@ abstract class PMXE_Controller_Admin extends PMXE_Controller {
 			$trace = debug_backtrace();			
 			$viewPath = str_replace('_', '/', preg_replace('%^' . preg_quote(PMXE_Plugin::PREFIX, '%') . '%', '', strtolower($trace[1]['class']))) . '/' . $trace[1]['function'];
 		}
-		
-		// render contextual help automatically
-		$viewHelpPath = $viewPath;
-		// append file extension if not specified
-		if ( ! preg_match('%\.php$%', $viewHelpPath)) {
-			$viewHelpPath .= '.php';
-		}
-		$viewHelpPath = preg_replace('%\.php$%', '-help.php', $viewHelpPath);
-		$fileHelpPath = PMXE_Plugin::ROOT_DIR . '/views/' . $viewHelpPath;
-				
-		if (is_file($fileHelpPath)) { // there is help file defined
-			ob_start();
-			include $fileHelpPath;
-			add_contextual_help(PMXE_Plugin::getInstance()->getAdminCurrentScreen()->id, ob_get_clean());
-		}
-		
 		parent::render($viewPath);
 	}
 	
