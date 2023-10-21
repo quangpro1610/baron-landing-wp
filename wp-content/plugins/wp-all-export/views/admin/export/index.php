@@ -112,7 +112,7 @@ do_action('pmxe_addons_html');
 										<?php foreach ($sorted_cpt as $key => $ct):?>
 											<?php
                                                 // Remove unused post types
-                                                if( in_array($key, array('wp_block', 'customize_changeset', 'custom_css', 'scheduled_action', 'scheduled-action', 'user_request', 'oembed_cache'))) {
+                                                if( in_array($key, array('wp_block', 'customize_changeset', 'custom_css', 'scheduled_action', 'scheduled-action', 'user_request', 'oembed_cache', 'wp_navigation'))) {
                                                     continue;
                                                 }
 												$image_src = 'dashicon-cpt';																								
@@ -178,9 +178,9 @@ do_action('pmxe_addons_html');
 
 
                                 <div class="wpallexport-free-edition-notice wpallexport-shop_order-export-notice">
-                                    <p><?php esc_html_e('The WooCommerce Export Package is Required to Export Orders.', 'wp_all_export_plugin'); ?></p>
-                                    <a class="upgrade_link" target="_blank" href="https://www.wpallimport.com/checkout/?edd_action=add_to_cart&download_id=4206899&edd_options%5Bprice_id%5D=1&utm_source=export-plugin-free&utm_medium=upgrade-notice&utm_campaign=export-orders"><?php
-                                        _e('Purchase the WooCommerce Export Package','wp_all_export_plugin');?></a>
+                                    <p><?php esc_html_e('The Order Export Add-On is Required to Export Orders.', 'wp_all_export_plugin'); ?></p>
+                                    <a class="upgrade_link thickbox open-plugin-details-modal" target="_blank" href="<?php echo admin_url('plugin-install.php?tab=plugin-information&plugin=order-export-for-woocommerce&TB_iframe=true&width=772&height=978');?>"><?php
+                                        _e('Download the Order Export Add-On','wp_all_export_plugin');?></a>
                                 </div>
 
                                 <div class="wpallexport-free-edition-notice wpallexport-shop_coupon-export-notice">
@@ -202,9 +202,9 @@ do_action('pmxe_addons_html');
                                 </div>
 
                                 <div class="wpallexport-free-edition-notice wpallexport-product-export-notice">
-                                    <p><?php esc_html_e('The WooCommerce Export Package is Required to Export WooCommerce Products.', 'wp_all_export_plugin'); ?></p>
-                                     <a class="upgrade_link" target="_blank" href="https://www.wpallimport.com/checkout/?edd_action=add_to_cart&download_id=4206899&edd_options%5Bprice_id%5D=1&utm_source=export-plugin-free&utm_medium=upgrade-notice&utm_campaign=export-products"><?php
-                                         esc_html_e('Purchase the WooCommerce Export Package','wp_all_export_plugin');?></a>
+                                    <p><?php esc_html_e('The Product Export Add-On is Required to Export WooCommerce Products.', 'wp_all_export_plugin'); ?></p>
+                                     <a class="upgrade_link thickbox open-plugin-details-modal" target="_blank" href="<?php echo admin_url('plugin-install.php?tab=plugin-information&plugin=product-export-for-woocommerce&TB_iframe=true&width=772&height=978');?>"><?php
+                                         esc_html_e('Download the Product Export Add-On','wp_all_export_plugin');?></a>
 
                                 </div>
 
@@ -305,8 +305,10 @@ do_action('pmxe_addons_html');
 					
 					<table><tr><td class="wpallexport-note"></td></tr></table>
 				</form>
-				
-				<a href="http://soflyy.com/" target="_blank" class="wpallexport-created-by"><?php esc_html_e('Created by', 'wp_all_export_plugin'); ?> <span></span></a>
+
+                <div class="wpallexport-display-columns wpallexport-margin-top-forty">
+					<?php echo apply_filters('wpallexport_footer', ''); ?>
+                </div>
 				
 			</div>
 		</td>		

@@ -3,6 +3,8 @@
 namespace Wpae\App\Service;
 
 
+use Wpae\App\Service\Addons\AddonNotFoundException;
+
 class ScheduledExport
 {
     /**
@@ -26,7 +28,7 @@ class ScheduledExport
         if (!$export->processing and $export->triggered) {
             return new JsonResponse(array(
                 'status' => 403,
-                'message' => sprintf(esc_html__('Export #%s already triggered. Request skipped.', 'wp_all_export_plugin'), $export->id)
+                'message' => sprintf('Export #%s already triggered. Request skipped.', $export->id)
             ));
         }
 
@@ -69,8 +71,11 @@ class ScheduledExport
                 'message' => sprintf(esc_html__('Export #%s is currently in manually process. Request skipped.', 'wp_all_export_plugin'), $export->id)
             ));
         } elseif ((int)$export->triggered and !(int)$export->processing) {
-            $response = $export->set(array('canceled' => 0))->execute($logger, true);
-
+            try {
+                $response = $export->set(array('canceled' => 0))->execute($logger, true);
+            } catch (AddonNotFoundException $e) {
+                die($e->getMessage());
+            }
             if (!(int)$export->triggered and !(int)$export->processing) {
 
                 // trigger update child exports with correct WHERE & JOIN filters

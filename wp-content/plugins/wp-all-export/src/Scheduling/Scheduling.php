@@ -83,6 +83,11 @@ class Scheduling
      */
     public function handleScheduling($id, $post)
     {
+
+        if (!$this->checkLicense()) {
+            return false;
+        }
+
         $schedulingEnabled = $post['scheduling_enable'];
    
         if ($schedulingEnabled == 1) {
@@ -210,6 +215,15 @@ class Scheduling
         }
 
         return $times;
+    }
+
+    public function updateApiKey($elementId, $newKey) {
+
+        $remoteSchedule = $this->getSchedule($elementId);
+
+        if ($remoteSchedule) {
+            $this->schedulingApi->updateScheduleKey($remoteSchedule->id, $newKey);
+        }
     }
 
     /**

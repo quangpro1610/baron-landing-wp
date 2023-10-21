@@ -110,12 +110,12 @@ function pmxe_pmxe_after_export($export_id, $export)
 		if ( $export->options['split_large_exports'] and $splitSize < $export->exported )
 		{
 
-			$exportOptions['split_files_list'] = array();							
+			$exportOptions['split_files_list'] = array();
 
 			if ( @file_exists($filepath) )
-			{					
+			{
 
-				switch ($export->options['export_to']) 
+				switch ($export->options['export_to'])
 				{
 					case 'xml':
 
@@ -152,7 +152,7 @@ function pmxe_pmxe_after_export($export_id, $export)
 
                         }
 
-			
+
 						$records_count = 0;
 						$chunk_records_count = 0;
 						$fileCount = 1;
@@ -204,133 +204,43 @@ function pmxe_pmxe_after_export($export_id, $export)
 						    if (($rowCount % $splitSize) == 0) {
 						        if ($rowCount > 0) {
 						            fclose($out);
-						        }						        
+						        }
 						        $outputFile = str_replace(basename($filepath), str_replace('.csv', '', basename($filepath)) . '-' . $fileCount++ . '.csv', $filepath);
 						        if ( ! in_array($outputFile, $exportOptions['split_files_list']))
 						        	$exportOptions['split_files_list'][] = $outputFile;
 
-						        $out = fopen($outputFile, 'w');						        
-						    }						    
-						    if ($data){				
+						        $out = fopen($outputFile, 'w');
+						    }
+						    if ($data){
 						    	if (($rowCount % $splitSize) == 0) {
 						    		fputcsv($out, $headers);
-						    	}		    	
+						    	}
 						        fputcsv($out, $data);
 						    }
 						    $rowCount++;
 						}
-						fclose($in);	
-						fclose($out);	
-
-						// convert splitted files into XLS format
-						if ( ! empty($exportOptions['split_files_list']) && ! empty($export->options['export_to_sheet']) and $export->options['export_to_sheet'] != 'csv' )
-						{
-							require_once PMXE_Plugin::ROOT_DIR . '/classes/PHPExcel/IOFactory.php';
-
-							foreach ($exportOptions['split_files_list'] as $key => $file) 
-							{
-								$objReader = PHPExcel_IOFactory::createReader('CSV');
-								// If the files uses a delimiter other than a comma (e.g. a tab), then tell the reader
-								$objReader->setDelimiter($export->options['delimiter']);
-								// If the files uses an encoding other than UTF-8 or ASCII, then tell the reader
-								$objPHPExcel = $objReader->load($file);
-                                switch ($export->options['export_to_sheet']){
-                                    case 'xls':
-                                        $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
-                                        $objWriter->save(str_replace(".csv", ".xls", $file));
-                                        $exportOptions['split_files_list'][$key] = str_replace(".csv", ".xls", $file);
-                                        break;
-                                    case 'xlsx':
-                                        $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
-                                        $objWriter->save(str_replace(".csv", ".xlsx", $file));
-                                        $exportOptions['split_files_list'][$key] = str_replace(".csv", ".xlsx", $file);
-                                        break;
-                                }
-								@unlink($file);
-							}
-						}
+						fclose($in);
+						fclose($out);
 
 						break;
-					
+
 					default:
-						
+
 						break;
-				}				
+				}
 
 				$export->set(array('options' => $exportOptions))->save();
-			}	
-		}	
-
-		// convert CSV to XLS
-		if ( @file_exists($filepath) and $export->options['export_to'] == 'csv' && ! empty($export->options['export_to_sheet']) and $export->options['export_to_sheet'] != 'csv')
-		{			
-			
-			require_once PMXE_Plugin::ROOT_DIR . '/classes/PHPExcel/IOFactory.php';
-
-			$objReader = PHPExcel_IOFactory::createReader('CSV');
-			// If the files uses a delimiter other than a comma (e.g. a tab), then tell the reader
-			$objReader->setDelimiter($export->options['delimiter']);
-			// If the files uses an encoding other than UTF-8 or ASCII, then tell the reader
-
-			$objPHPExcel = $objReader->load($filepath);
-
-            switch ($export->options['export_to_sheet']) {
-                case 'xls':
-                    $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
-                    $objWriter->save(str_replace(".csv", ".xls", $filepath));
-                    @unlink($filepath);
-                    $filepath = str_replace(".csv", ".xls", $filepath);
-                    break;
-                case 'xlsx':
-                    $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
-                    $objWriter->save(str_replace(".csv", ".xlsx", $filepath));
-                    @unlink($filepath);
-                    $filepath = str_replace(".csv", ".xlsx", $filepath);
-                    break;
-            }
-
-			$exportOptions = $export->options;
-			$exportOptions['filepath'] = wp_all_export_get_relative_path($filepath);
-			$export->set(array('options' => $exportOptions))->save();
-
-			$is_secure_import = PMXE_Plugin::getInstance()->getOption('secure');
-
-			if ( ! $is_secure_import ){
-				$wp_uploads = wp_upload_dir();
-				$wp_filetype = wp_check_filetype(basename($filepath), null );
-				$attachment_data = array(
-				    'guid' => $wp_uploads['baseurl'] . '/' . _wp_relative_upload_path( $filepath ), 
-				    'post_mime_type' => $wp_filetype['type'],
-				    'post_title' => preg_replace('/\.[^.]+$/', '', basename($filepath)),
-				    'post_content' => '',
-				    'post_status' => 'inherit'
-				);	
-				if ( ! empty($export->attch_id) )
-				{
-					$attach_id = $export->attch_id;						
-					$attachment = get_post($attach_id);
-					if ($attachment)
-					{
-						update_attached_file( $attach_id, $filepath );
-						wp_update_attachment_metadata( $attach_id, $attachment_data );	
-					}
-					else
-					{
-						$attach_id = wp_insert_attachment( $attachment_data, PMXE_Plugin::$session->file );				
-					}
-				}
 			}
-
 		}
 
 		// make a temporary copy of current file
 		if ( empty($export->parent_id) and @file_exists($filepath) and @copy($filepath, str_replace(basename($filepath), '', $filepath) . 'current-' . basename($filepath)))
 		{
 			$exportOptions = $export->options;
-			$exportOptions['current_filepath'] = str_replace(basename($filepath), '', $filepath) . 'current-' . basename($filepath);						
+			$exportOptions['current_filepath'] = str_replace(basename($filepath), '', $filepath) . 'current-' . basename($filepath);
 			$export->set(array('options' => $exportOptions))->save();
 		}
-		
+
 		$generateBundle = apply_filters('wp_all_export_generate_bundle', true);
 
 		if($generateBundle) {
@@ -349,69 +259,10 @@ function pmxe_pmxe_after_export($export_id, $export)
 			}
 		}
 
-
-		// send exported data to zapier.com
-		$subscriptions = get_option('zapier_subscribe', array());		
-		if ( ! empty($subscriptions) and empty($export->parent_id))
-		{			
-
-			$wp_uploads = wp_upload_dir();
-
-			$fileurl = str_replace($wp_uploads['basedir'], $wp_uploads['baseurl'], $filepath);		
-
-			$response = array( 				
-				'website_url' => home_url(),
-				'export_id' => $export->id, 
-				'export_name' => $export->friendly_name,
-				'file_name' => basename($filepath),
-				'file_type' => wp_all_export_get_export_format($export->options),
-				'post_types_exported' => empty($export->options['cpt']) ? $export->options['wp_query'] : implode($export->options['cpt'], ','),
-				'export_created_date' => $export->registered_on,
-				'export_last_run_date' => date('Y-m-d H:i:s'),
-				'export_trigger_type' => empty($_GET['export_key']) ? 'manual' : 'cron',
-				'records_exported' => $export->exported,
-				'export_file' => ''
-			);
-
-			if (file_exists($filepath))
-			{
-				$response['export_file_url'] = $fileurl;
-				$response['status'] = 200;
-				$response['message'] = 'OK';	
-			}
-			else
-			{
-				$response['export_file_url'] = '';
-				$response['status'] = 300;
-				$response['message'] = 'File doesn\'t exist';	
-			}
-
-			$response = apply_filters('wp_all_export_zapier_response', $response);
-
-			foreach ($subscriptions as $zapier) 
-			{
-				if (empty($zapier['target_url'])) continue;
-
-				wp_remote_post( $zapier['target_url'], array(
-					'method' => 'POST',
-					'timeout' => 45,
-					'redirection' => 5,
-					'httpversion' => '1.0',
-					'blocking' => true,
-					'headers' => array(
-							'Content-Type' => 'application/json'
-						),
-					'body' => "[".json_encode($response)."]",
-					'cookies' => array()
-				    )
-				);
-			}			
-		}
-
-		// clean session 
+		// clean session
 		if ( ! empty(PMXE_Plugin::$session) and PMXE_Plugin::$session->has_session() )
 		{
-			PMXE_Plugin::$session->clean_session( $export->id );				
+			PMXE_Plugin::$session->clean_session( $export->id );
 		}
-	}	
+	}
 }

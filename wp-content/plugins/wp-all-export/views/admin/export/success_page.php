@@ -29,7 +29,7 @@ $isGoogleFeed = false;
 
         <script type="text/javascript">
             jQuery(document).ready(function () {
-                jQuery('.success-tabs .tab').click(function () {
+                jQuery('.success-tabs .tab').on('click', function () {
                     jQuery('.success-tabs .tab').removeClass('selected');
                     jQuery(this).addClass('selected');
                     var rel = jQuery(this).attr('rel');

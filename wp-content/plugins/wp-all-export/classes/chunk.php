@@ -249,6 +249,7 @@ class PMXE_Chunk {
 
 class wpae_preprocessXml_filter extends php_user_filter {    
 
+    #[ReturnTypeWillChange]
     function filter($in, $out, &$consumed, $closing)
     {
       while ($bucket = stream_bucket_make_writeable($in)) {        

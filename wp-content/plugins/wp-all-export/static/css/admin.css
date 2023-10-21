@@ -36,6 +36,11 @@
     /*max-height: 600px;*/
     overflow: auto;
 }
+
+.wpallexport-plugin .wpallexport-step-4 .wpallexport-free-edition-notice a.upgrade_link {
+    font-size: 1.3em !important;
+}
+
 .wpallexport-plugin .wp_all_export_custom_xml_help p,
 .wpallexport-plugin .wp_all_export_scheduling_help p
 {
@@ -147,6 +152,12 @@
     text-align: center;
     text-decoration: none;
 }
+
+.wpallexport-plugin .connection-icon .help_scheduling {
+    margin: 0;
+    position: initial;
+}
+
 .wpallexport-plugin .wpallexport-free-edition-notice{
     display: block;
     margin: 5px;
@@ -4499,3 +4510,119 @@ input label {
 }
 
 
+.wpae-shake {
+    -webkit-animation: wpae_shake 0.4s 1 linear;
+    -moz-animation: wpae_shake 0.4s 1 linear;
+    -o-animation: wpae_shake 0.4s 1 linear;
+}
+@-webkit-keyframes wpae_shake {
+    0% { -webkit-transform: translate(30px); }
+    20% { -webkit-transform: translate(-30px); }
+    40% { -webkit-transform: translate(15px); }
+    60% { -webkit-transform: translate(-15px); }
+    80% { -webkit-transform: translate(8px); }
+    100% { -webkit-transform: translate(0px); }
+}
+@-moz-keyframes wpae_shake {
+    0% { -moz-transform: translate(30px); }
+    20% { -moz-transform: translate(-30px); }
+    40% { -moz-transform: translate(15px); }
+    60% { -moz-transform: translate(-15px); }
+    80% { -moz-transform: translate(8px); }
+    100% { -moz-transform: translate(0px); }
+}
+@-o-keyframes wpae_shake {
+    0% { -o-transform: translate(30px); }
+    20% { -o-transform: translate(-30px); }
+    40% { -o-transform: translate(15px); }
+    60% { -o-transform: translate(-15px); }
+    80% { -o-transform: translate(8px); }
+    100% { -o-origin-transform: translate(0px); }
+}
+
+.wpae-shake-small {
+    -webkit-animation: wpae_shake_small 0.4s 1 linear;
+    -moz-animation: wpae_shake_small 0.4s 1 linear;
+    -o-animation: wpae_shake_small 0.4s 1 linear;
+}
+@-webkit-keyframes wpae_shake_small {
+    0% { -webkit-transform: translate(10px); }
+    20% { -webkit-transform: translate(-10px); }
+    40% { -webkit-transform: translate(5px); }
+    60% { -webkit-transform: translate(-5px); }
+    80% { -webkit-transform: translate(3px); }
+    100% { -webkit-transform: translate(0px); }
+}
+@-moz-keyframes wpae_shake_small {
+    0% { -moz-transform: translate(10px); }
+    20% { -moz-transform: translate(-10px); }
+    40% { -moz-transform: translate(5px); }
+    60% { -moz-transform: translate(-5px); }
+    80% { -moz-transform: translate(3px); }
+    100% { -moz-transform: translate(0px); }
+}
+@-o-keyframes wpae_shake_small {
+    0% { -o-transform: translate(10px); }
+    20% { -o-transform: translate(-10px); }
+    40% { -o-transform: translate(5px); }
+    60% { -o-transform: translate(-5px); }
+    80% { -o-transform: translate(3px); }
+    100% { -o-origin-transform: translate(0px); }
+}
+
+/*
+    New footer styles.
+ */
+.wpallexport-plugin .wpallexport-cta-text-link {
+    display: flex;
+    justify-content: right;
+    align-content: center;
+    flex-wrap: wrap;
+    flex-direction: row;
+    font-size: 13px;
+}
+
+.wpallexport-plugin .wpallexport-negative-margin .wpallexport-cta-text-link {
+    margin-top: -45px;
+}
+
+.wpallexport-plugin .wpallexport-negative-margin.sixty .wpallexport-cta-text-link {
+    margin-top: -60px;
+}
+
+.wpallexport-plugin .wpallexport-cta-text-link img {
+    padding-top: 14px;
+    padding-bottom: 10px;
+    padding-right: 5px;
+    height: 15px;
+}
+
+.wpallexport-plugin .wpallexport-footer {
+    display: flex;
+    justify-content: center;
+    flex-direction: column-reverse;
+}
+
+.wpallexport-plugin .wpallexport-negative-margin.sixty .wpallexport-footer {
+    margin-top: -60px;
+}
+
+.wpallexport-plugin .wpallexport-negative-margin.fifteen .wpallexport-footer {
+    margin-top: -15px;
+}
+
+.wpallexport-plugin .wpallexport-display-columns .wpallexport-footer div {
+    width: 33%;
+}
+
+.wpallexport-plugin .wpallexport-display-columns .wpallexport-footer{
+    flex-direction: row;
+}
+
+.wpallexport-plugin .wpallexport-display-columns .wpallexport-footer .wpallexport-soflyy {
+    margin-bottom: 15px;
+}
+
+.wpallexport-plugin .wpallexport-margin-top-forty .wpallexport-footer {
+    margin-top: 40px;
+}

@@ -659,7 +659,8 @@ class WpaeXmlProcessor
      * Cloning DOMNode with including child DOMNode elements
      *
      * @param $node
-     * @return \DOMNode*
+     *
+     * @return DOMNode|string
      */
     private function cloneNode(DOMNode $node, $snippet, $snippetValues){
 

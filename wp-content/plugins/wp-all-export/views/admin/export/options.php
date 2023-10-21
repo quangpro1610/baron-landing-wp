@@ -35,7 +35,7 @@ $l10n = array(
 	
 				<?php do_action('pmxe_options_header', $this->isWizard, $post); ?>
 				
-				<div class="ajax-console">					
+				<div class="ajax-console">
 					<?php if ($this->errors->get_error_codes()): ?>
 						<?php $this->error() ?>
 					<?php endif ?>					
@@ -128,11 +128,12 @@ $l10n = array(
                         <?php endif ?>
                     </div>
 
+                </form>
 
-				</form>					
-								
-				<a href="http://soflyy.com/" target="_blank" class="wpallexport-created-by"><?php esc_html_e('Created by', 'wp_all_export_plugin'); ?> <span></span></a>
-					
+                <div class="wpallexport-display-columns wpallexport-margin-top-forty">
+					<?php echo apply_filters('wpallexport_footer', ''); ?>
+                </div>
+
 			</td>			
 		</tr>
 	</table>

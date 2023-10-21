@@ -28,12 +28,13 @@ class VariationOptions extends BasicVariationOptions implements VariationOptions
                 $parentId = $entry->post_parent;
                 $parent = get_post($parentId);
                 if ( ! empty($parent) ){
-                    $parent->originalPost = clone $entry;
-                    $entry = $parent;
-                    $entry->ID = $entryId;
-                    $entry->post_status = $entryStatus;
-                    $entry->menu_order = $entryOrder;
-                    $entry->post_parent = $parentId;
+	                /** @noinspection PhpDynamicFieldDeclarationInspection */
+	                $parent->originalPost = clone $entry;
+                    $entry                = $parent;
+                    $entry->ID            = $entryId;
+                    $entry->post_status   = $entryStatus;
+                    $entry->menu_order    = $entryOrder;
+                    $entry->post_parent   = $parentId;
                     if (\XmlExportEngine::getProductVariationTitleMode() == \XmlExportEngine::VARIATION_USE_DEFAULT_TITLE) {
                         $entry->post_title = $entryTitle;
                     }

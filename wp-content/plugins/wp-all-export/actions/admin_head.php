@@ -1,5 +1,14 @@
 <?php
 function pmxe_admin_head(){
+
+    if(!isset($_GET['page'])) {
+        return;
+    }
+
+    if(strpos($_GET['page'], 'pmxe-') === false) {
+        return;
+    }
+
 	$input = new PMXE_Input();
 	$export_id = $input->get('id', false);
 	$export_action = $input->get('action', false);	

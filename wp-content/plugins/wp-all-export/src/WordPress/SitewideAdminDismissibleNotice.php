@@ -18,7 +18,7 @@ class SitewideAdminDismissibleNotice extends AdminNotice
         ?>
         <script type="text/javascript">
             jQuery(document).ready(function(){
-                jQuery('.wpae-general-notice-dismiss').click(function(){
+                jQuery('.wpae-general-notice-dismiss').on('click', function(){
 
                     var $parent = jQuery(this).parent();
                     var noticeId = jQuery(this).attr('data-noticeId');

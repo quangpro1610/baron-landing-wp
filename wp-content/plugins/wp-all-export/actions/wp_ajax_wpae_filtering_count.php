@@ -130,6 +130,15 @@ function pmxe_wp_ajax_wpae_filtering_count()
             add_filter('posts_join', 'wp_all_export_posts_join', 10, 1);
 
             $exportQuery = eval('return new WP_Query(array(' . PMXE_Plugin::$session->get('wp_query') . ', \'offset\' => 0, \'posts_per_page\' => 10 ));');
+
+            // Clear LIKE, NOT LIKE, and 's' percent placeholders for request and orderby.
+            global $wpdb;
+            $exportQuery->request = $wpdb->remove_placeholder_escape($exportQuery->request);
+
+            foreach( $exportQuery->query_vars['search_orderby_title'] as $key => $value ){
+                $exportQuery->query_vars['search_orderby_title'][$key] = $wpdb->remove_placeholder_escape($value);
+            }
+
             if (!empty($exportQuery->found_posts)) {
                 $foundRecords = $exportQuery->found_posts;
             }

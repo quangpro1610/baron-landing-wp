@@ -4,11 +4,11 @@ function pmxe_wp_ajax_scheduling_dialog_content()
 {
 
     if (!check_ajax_referer('wp_all_export_secure', 'security', false)) {
-        exit(json_encode(array('html' => __('Security check', 'wp_all_export_plugin'))));
+        exit(json_encode(array('html' => esc_html__('Security check', 'wp_all_export_plugin'))));
     }
 
     if (!current_user_can(PMXE_Plugin::$capabilities)) {
-        exit(json_encode(array('html' => __('Security check', 'wp_all_export_plugin'))));
+        exit(json_encode(array('html' => esc_html__('Security check', 'wp_all_export_plugin'))));
     }
 
     $export_id = $_POST['id'];
@@ -17,7 +17,7 @@ function pmxe_wp_ajax_scheduling_dialog_content()
     if (!$export) {
         throw new Exception('Export not found');
     }
-    $post = $export->options;
+    $schedulingExportOptions = $export->options;
 
     $hasActiveLicense = PMXE_Plugin::hasActiveSchedulingLicense();
 
@@ -27,20 +27,20 @@ function pmxe_wp_ajax_scheduling_dialog_content()
 
     $cron_job_key = PMXE_Plugin::getInstance()->getOption('cron_job_key');
 
-    if (!isset($post['scheduling_enable'])) {
-        $post['scheduling_enable'] = 0;
+    if (!isset($schedulingExportOptions['scheduling_enable'])) {
+        $schedulingExportOptions['scheduling_enable'] = 0;
     }
 
-    if (!isset($post['scheduling_timezone'])) {
-        $post['scheduling_timezone'] = 'UTC';
+    if (!isset($schedulingExportOptions['scheduling_timezone'])) {
+        $schedulingExportOptions['scheduling_timezone'] = 'UTC';
     }
 
-    if (!isset($post['scheduling_run_on'])) {
-        $post['scheduling_run_on'] = 'weekly';
+    if (!isset($schedulingExportOptions['scheduling_run_on'])) {
+        $schedulingExportOptions['scheduling_run_on'] = 'weekly';
     }
 
-    if (!isset($post['scheduling_times'])) {
-        $post['scheduling_times'] = array();
+    if (!isset($schedulingExportOptions['scheduling_times'])) {
+        $schedulingExportOptions['scheduling_times'] = array();
     }
     ?>
 
@@ -195,7 +195,7 @@ function pmxe_wp_ajax_scheduling_dialog_content()
 
         #add-subscription-field {
             position: absolute;
-            left: -155px;
+            left: -152px;
             top: -1px;
             height: 46px;
             border-radius: 5px;
@@ -248,9 +248,14 @@ function pmxe_wp_ajax_scheduling_dialog_content()
         .manual-scheduling {
             margin-left: 26px;
         }
+
         .chosen-container .chosen-results {
 
             margin: 0 4px 4px 0 !important;
+        }
+
+        .unable-to-connect {
+            color: #f2b03d;
         }
     </style>
 
@@ -269,6 +274,23 @@ function pmxe_wp_ajax_scheduling_dialog_content()
                             $('#scheduling-title').trigger('click');
                         }
                     }
+
+                    updateSaveButtonState = function() {
+                        var howToRun = $('input[name="scheduling_enable"]:checked').val();
+
+                        if(parseInt(howToRun) === 1 && !hasActiveLicense) {
+                            $('.save-changes').addClass('disabled');
+                        } else {
+                            $('.save-changes').removeClass('disabled');
+                        }
+                    };
+
+                    updateSaveButtonState();
+
+                    $('input[name="scheduling_enable"]').on('change', function(){
+                        updateSaveButtonState();
+                    });
+
 
                     window.pmxeValidateSchedulingForm = function () {
 
@@ -342,7 +364,7 @@ function pmxe_wp_ajax_scheduling_dialog_content()
                         };
                     };
 
-                    $('#weekly li').click(function () {
+                    $('#weekly li').on('click', function () {
 
                         $('#weekly li').removeClass('error');
 
@@ -363,7 +385,7 @@ function pmxe_wp_ajax_scheduling_dialog_content()
 
                     });
 
-                    $('#monthly li').click(function () {
+                    $('#monthly li').on('click', function () {
 
                         $('#monthly li').removeClass('error');
                         $(this).parent().parent().find('.days-of-week li').removeClass('selected');
@@ -372,7 +394,7 @@ function pmxe_wp_ajax_scheduling_dialog_content()
                         $('#monthly_days').val($(this).data('day'));
                     });
 
-                    $('input[name="scheduling_run_on"]').change(function () {
+                    $('input[name="scheduling_run_on"]').on('change', function () {
                         var val = $('input[name="scheduling_run_on"]:checked').val();
                         if (val == "weekly") {
 
@@ -417,7 +439,7 @@ function pmxe_wp_ajax_scheduling_dialog_content()
 
                     $('#timezone').chosen({width: '284px'});
 
-                    $('.wpae-save-button').click(function (e) {
+                    $('.wpae-save-button').on('click', function (e) {
 
                         var initialValue = $(this).find('.save-text').html();
                         var schedulingEnable = $('input[name="scheduling_enable"]:checked').val();
@@ -426,7 +448,7 @@ function pmxe_wp_ajax_scheduling_dialog_content()
                         if (!hasActiveLicense) {
                             if (!$(this).data('iunderstand') && schedulingEnable) {
                                 $('#no-subscription').slideDown();
-                                $(this).find('.save-text').html('<?php echo _e('I Understand');?>');
+                                $(this).find('.save-text').html('<?php esc_html_e('I Understand');?>');
                                 $(this).find('.save-text').css('left', '100px');
                                 $(this).data('iunderstand', 1);
 
@@ -490,18 +512,18 @@ function pmxe_wp_ajax_scheduling_dialog_content()
                         });
                     });
 
-                    <?php if($post['scheduling_timezone'] == 'UTC') {
+                    <?php if($schedulingExportOptions['scheduling_timezone'] == 'UTC') {
                     ?>
                     var timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-                    if($('#timezone').find("option:contains('"+ timeZone +"')").length != 0){
+                    if ($('#timezone').find("option:contains('" + timeZone + "')").length != 0) {
                         $('#timezone').trigger("chosen:updated");
                         $('#timezone').val(timeZone);
                         $('#timezone').trigger("chosen:updated");
-                    }else{
+                    } else {
                         var parts = timeZone.split('/');
-                        var lastPart = parts[parts.length-1];
-                        var opt = $('#timezone').find("option:contains('"+ lastPart +"')");
+                        var lastPart = parts[parts.length - 1];
+                        var opt = $('#timezone').find("option:contains('" + lastPart + "')");
 
                         $('#timezone').val(opt.val());
                         $('#timezone').trigger("chosen:updated");
@@ -513,7 +535,7 @@ function pmxe_wp_ajax_scheduling_dialog_content()
 
                     var saveSubscription = false;
 
-                    $('#add-subscription').click(function () {
+                    $('#add-subscription').on('click', function () {
 
                         $('#add-subscription-field').show();
                         $('#add-subscription-field').animate({width: '400px'}, 225);
@@ -530,14 +552,14 @@ function pmxe_wp_ajax_scheduling_dialog_content()
                         return false;
                     });
 
-                    $('#subscribe-button').click(function () {
+                    $('#subscribe-button').on('click', function () {
 
                         if (saveSubscription) {
                             $('#subscribe-button .easing-spinner').show();
 
                             var license = $('#add-subscription-field').val();
                             $.ajax({
-                                url: ajaxurl + '?action=wpae_api&q=schedulingLicense/saveSchedulingLicense&security=<?php echo wp_create_nonce("wp_all_export_secure");?>',
+                                url: ajaxurl + '?action=wpae_api&q=schedulingLicense/saveSchedulingLicense&security=<?php echo esc_js(wp_create_nonce("wp_all_export_secure"));?>',
                                 type: "POST",
                                 data: {
                                     license: license
@@ -579,7 +601,7 @@ function pmxe_wp_ajax_scheduling_dialog_content()
 
                                         setTimeout(function () {
                                             $('#add-subscription-field').animate({width: '140px'}, 225);
-                                            $('#add-subscription-field').animate({left: '-155px'}, 225);
+                                            $('#add-subscription-field').animate({left: '-152px'}, 225);
                                         }, 300);
 
                                         $('#add-subscription-field').val('');
@@ -596,7 +618,7 @@ function pmxe_wp_ajax_scheduling_dialog_content()
                 });
             });
             // help scheduling template
-            $('.help_scheduling').click(function () {
+            $('.help_scheduling').on('click', function () {
 
                 $('.wp-all-export-scheduling-help').css('left', ($(document).width() / 2) - 255).show();
                 $('#wp-all-export-scheduling-help-inner').css('max-height', $(window).height() - 150).show();
@@ -606,7 +628,7 @@ function pmxe_wp_ajax_scheduling_dialog_content()
                 return false;
             });
 
-            $('.wp_all_export_scheduling_help').find('h3').unbind('click').click(function () {
+            $('.wp_all_export_scheduling_help').find('h3').off('click').on('click', function () {
                 var $action = $(this).find('span').html();
                 $('.wp_all_export_scheduling_help').find('h3').each(function () {
                     $(this).find('span').html("+");
@@ -622,7 +644,7 @@ function pmxe_wp_ajax_scheduling_dialog_content()
                 }
             });
 
-            $('.wpallexport-super-overlay').click(function () {
+            $('.wpallexport-super-overlay').on('click', function () {
                 $('.wp-all-export-scheduling-help, .wp-all-export-scheduling-help-inner').hide();
                 $('.wp-pointer').show();
                 $('.wpallexport-overlay').show();
@@ -635,25 +657,26 @@ function pmxe_wp_ajax_scheduling_dialog_content()
     </script>
     <?php require __DIR__ . '/../src/Scheduling/views/CommonJs.php'; ?>
     <div id="post-preview" class="wpallexport-preview wpallexport-scheduling-dialog">
-        <p class="wpallexport-preview-title"><strong>Scheduling Options</strong></p>
+        <p class="wpallexport-preview-title"><strong>Scheduling Options for Export ID
+                #<?php echo intval($export_id); ?></strong></p>
         <div class="wpallexport-preview-content" style="max-height: 700px; overflow: visible;">
 
             <div style="margin-bottom: 20px;">
                 <label>
                     <input type="radio" name="scheduling_enable"
-                           value="0" <?php if ((isset($post['scheduling_enable']) && $post['scheduling_enable'] == 0) || !isset($post['scheduling_enable'])) { ?> checked="checked" <?php } ?>/>
+                           value="0" <?php if ((isset($schedulingExportOptions['scheduling_enable']) && $schedulingExportOptions['scheduling_enable'] == 0) || !isset($schedulingExportOptions['scheduling_enable'])) { ?> checked="checked" <?php } ?>/>
                     <h4 style="display: inline-block;"><?php esc_html_e('Do Not Schedule'); ?></h4>
                 </label>
             </div>
             <div>
                 <label>
                     <input type="radio" name="scheduling_enable"
-                           value="1" <?php if ($post['scheduling_enable'] == 1) { ?> checked="checked" <?php } ?>/>
+                           value="1" <?php if ($schedulingExportOptions['scheduling_enable'] == 1) { ?> checked="checked" <?php } ?>/>
                     <h4 style="margin: 0; display: inline-flex; align-items: center;"><?php esc_html_e('Automatic Scheduling', PMXE_Plugin::LANGUAGE_DOMAIN); ?>
                         <span class="connection-icon" style="margin-left: 8px; height: 16px;">
-															<?php include __DIR__ . '/../src/Scheduling/views/ConnectionIcon.php'; ?>
-														</span>
-                        <?php if($post['scheduling_enable'] == 1) { ?>
+                                                        <?php include __DIR__ . '/../src/Scheduling/views/ConnectionIcon.php'; ?>
+                                                    </span>
+                        <?php if($schedulingExportOptions['scheduling_enable'] == 1) { ?>
                             <?php if (!$scheduling->checkConnection()) { ?>
                                 <span class="wpai-license" style="margin-left: 8px; font-weight: normal; font-weight: normal; <?php if(!$hasActiveLicense) { ?> display: none; <?php }?>"><span class="unable-to-connect">Unable to connect, please contact support.</span></span>
                             <?php } ?>
@@ -668,27 +691,28 @@ function pmxe_wp_ajax_scheduling_dialog_content()
                     </label>
                 </div>
                 <div id="automatic-scheduling"
-                     style="margin-left: 21px; <?php if ($post['scheduling_enable'] != 1) { ?> display: none; <?php } ?>">
+                     style="margin-left: 21px; <?php if ($schedulingExportOptions['scheduling_enable'] != 1) { ?> display: none; <?php } ?>">
                     <div>
                         <div class="input">
                             <label style="color: rgb(68,68,68);">
                                 <input
-                                        type="radio" <?php if (isset($post['scheduling_run_on']) && $post['scheduling_run_on'] != 'monthly') { ?> checked="checked" <?php } ?>
+                                        type="radio" <?php if (isset($schedulingExportOptions['scheduling_run_on']) && $schedulingExportOptions['scheduling_run_on'] != 'monthly') { ?> checked="checked" <?php } ?>
                                         name="scheduling_run_on" value="weekly"
                                         checked="checked"/> <?php esc_html_e('Every week on...', PMXE_Plugin::LANGUAGE_DOMAIN); ?>
                             </label>
                         </div>
                         <input type="hidden" style="width: 500px;" name="scheduling_weekly_days"
-                               value="<?php echo esc_attr($post['scheduling_weekly_days']); ?>" id="weekly_days"/>
+                               value="<?php echo esc_attr($schedulingExportOptions['scheduling_weekly_days']); ?>"
+                               id="weekly_days"/>
                         <?php
-                        if (isset($post['scheduling_weekly_days'])) {
-                            $weeklyArray = explode(',', $post['scheduling_weekly_days']);
+                        if (isset($schedulingExportOptions['scheduling_weekly_days'])) {
+                            $weeklyArray = explode(',', $schedulingExportOptions['scheduling_weekly_days']);
                         } else {
                             $weeklyArray = array();
                         }
                         ?>
                         <ul class="days-of-week" id="weekly"
-                            style="<?php if ($post['scheduling_run_on'] == 'monthly') { ?> display: none; <?php } ?>">
+                            style="<?php if ($schedulingExportOptions['scheduling_run_on'] == 'monthly') { ?> display: none; <?php } ?>">
                             <li data-day="0" <?php if (in_array('0', $weeklyArray)) { ?> class="selected" <?php } ?>>
                                 Mon
                             </li>
@@ -717,22 +741,23 @@ function pmxe_wp_ajax_scheduling_dialog_content()
                         <div class="input">
                             <label style="color: rgb(68,68,68); margin-top: 5px;">
                                 <input
-                                        type="radio" <?php if (isset($post['scheduling_run_on']) && $post['scheduling_run_on'] == 'monthly') { ?> checked="checked" <?php } ?>
+                                        type="radio" <?php if (isset($schedulingExportOptions['scheduling_run_on']) && $schedulingExportOptions['scheduling_run_on'] == 'monthly') { ?> checked="checked" <?php } ?>
                                         name="scheduling_run_on"
                                         value="monthly"/> <?php esc_html_e('Every month on the first...', PMXE_Plugin::LANGUAGE_DOMAIN); ?>
                             </label>
                         </div>
                         <input type="hidden" name="scheduling_monthly_days"
-                               value="<?php if(isset($post['scheduling_monthly_days'])) echo esc_attr($post['scheduling_monthly_days']); ?>" id="monthly_days"/>
+                               value="<?php if (isset($schedulingExportOptions['scheduling_monthly_days'])) echo esc_attr($schedulingExportOptions['scheduling_monthly_days']); ?>"
+                               id="monthly_days"/>
                         <?php
-                        if (isset($post['scheduling_monthly_days'])) {
-                            $monthlyArray = explode(',', $post['scheduling_monthly_days']);
+                        if (isset($schedulingExportOptions['scheduling_monthly_days'])) {
+                            $monthlyArray = explode(',', $schedulingExportOptions['scheduling_monthly_days']);
                         } else {
                             $monthlyArray = array();
                         }
                         ?>
                         <ul class="days-of-week" id="monthly"
-                            style="<?php if ($post['scheduling_run_on'] != 'monthly') { ?> display: none; <?php } ?>">
+                            style="<?php if ($schedulingExportOptions['scheduling_run_on'] != 'monthly') { ?> display: none; <?php } ?>">
                             <li data-day="0" <?php if (in_array('0', $monthlyArray)) { ?> class="selected" <?php } ?>>
                                 Mon
                             </li>
@@ -764,8 +789,8 @@ function pmxe_wp_ajax_scheduling_dialog_content()
                         </div>
 
                         <div id="times" style="margin-bottom: 10px;">
-                            <?php if (isset($post['scheduling_times']) && is_array($post['scheduling_times'])) {
-                                foreach ($post['scheduling_times'] as $time) { ?>
+                            <?php if (isset($schedulingExportOptions['scheduling_times']) && is_array($schedulingExportOptions['scheduling_times'])) {
+                                foreach ($schedulingExportOptions['scheduling_times'] as $time) { ?>
 
                                     <?php if ($time) { ?>
                                         <input class="timepicker" type="text" name="scheduling_times[]"
@@ -780,8 +805,8 @@ function pmxe_wp_ajax_scheduling_dialog_content()
                             <?php
 
                             $timezoneValue = false;
-                            if ($post['scheduling_timezone']) {
-                                $timezoneValue = $post['scheduling_timezone'];
+                            if ($schedulingExportOptions['scheduling_timezone']) {
+                                $timezoneValue = $schedulingExportOptions['scheduling_timezone'];
                             }
 
                             $timezoneSelect = new \Wpae\Scheduling\Timezone\TimezoneSelect();
@@ -831,7 +856,7 @@ function pmxe_wp_ajax_scheduling_dialog_content()
                                 <p><?php esc_html_e('Get automatic scheduling for unlimited sites, just $9/mo.'); ?></p>
                                 <p><?php esc_html_e('Have a license?'); ?>
                                     <a href="#"
-                                       id="add-subscription"><?php esc_html_e('Register this site.'); ?></a> <?php _e('Questions?'); ?>
+                                       id="add-subscription"><?php esc_html_e('Register this site.'); ?></a> <?php esc_html_e('Questions?'); ?>
                                     <a href="#" class="help_scheduling">Read more.</a>
                                 </p>
                                 <input type="password" id="add-subscription-field"

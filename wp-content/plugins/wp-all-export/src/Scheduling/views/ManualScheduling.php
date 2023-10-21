@@ -2,11 +2,11 @@
 
     <label>
         <input type="radio" name="scheduling_enable"
-               value="2" <?php if ($post['scheduling_enable'] == 2) { ?> checked="checked" <?php } ?>/>
+               value="2"/>
         <h4 style="margin-top: 0;display: inline-block;"><?php esc_html_e('Manual Scheduling', PMXE_Plugin::LANGUAGE_DOMAIN); ?></h4>
     </label>
     <div style="margin-left: 26px; margin-bottom: 10px; font-size: 13px;"><?php esc_html_e('Run this export using cron jobs.'); ?></div>
-    <div style="<?php if ($post['scheduling_enable'] != 2) { ?> display: none; <?php } ?>" class="manual-scheduling">
+    <div style="display: none;" class="manual-scheduling">
 
         <div class="wpallexport-free-edition-notice" style="margin: 15px 0; width: 90%; padding-left: 10px; padding-right: 10px;">
             <a style="font-size: 1.3em;" class="upgrade_link" target="_blank" href="https://www.wpallimport.com/checkout/?edd_action=add_to_cart&download_id=2707173&edd_options%5Bprice_id%5D=1&utm_source=export-plugin-free&utm_medium=upgrade-notice&utm_campaign=manual-scheduling"><?php esc_html_e('Upgrade to the Pro edition of WP All Export for Manual Scheduling','wp_all_export_plugin');?></a>
