@@ -28,14 +28,10 @@ class VariationOptions implements VariationOptionsInterface
      */
     protected function defaultQuery($wpdb, $where, $join, $closeBracket)
     {
-        $langQuery = '';
 
-        if($this->isLanguageFilterEnabled()) {
-            $langQuery .= $wpdb->prepare(" AND t.language_code = %s ", \XmlExportEngine::$exportOptions['wpml_lang']);
-        }
 
         if($closeBracket) {
-            $sql = " AND $wpdb->posts.post_type = 'product' " . $langQuery . " AND $wpdb->posts.ID NOT IN (SELECT o.ID FROM $wpdb->posts o
+            $sql = " AND $wpdb->posts.post_type = 'product' AND $wpdb->posts.ID NOT IN (SELECT o.ID FROM $wpdb->posts o
                             LEFT OUTER JOIN $wpdb->posts r
                             ON o.post_parent = r.ID
                             WHERE r.post_status = 'trash' AND o.post_type = 'product_variation')) 
@@ -50,7 +46,7 @@ class VariationOptions implements VariationOptionsInterface
                         
                         )";
         } else {
-            $sql = " AND $wpdb->posts.post_type = 'product' " . $langQuery . " AND $wpdb->posts.ID NOT IN (SELECT o.ID FROM $wpdb->posts o
+            $sql = " AND $wpdb->posts.post_type = 'product' AND $wpdb->posts.ID NOT IN (SELECT o.ID FROM $wpdb->posts o
                             LEFT OUTER JOIN $wpdb->posts r
                             ON o.post_parent = r.ID
                             WHERE r.post_status = 'trash' AND o.post_type = 'product_variation') 
@@ -71,15 +67,5 @@ class VariationOptions implements VariationOptionsInterface
 
         return $sql;
 
-    }
-
-    /**
-     * @return bool
-     */
-    private function isLanguageFilterEnabled()
-    {
-        return class_exists('SitePress') &&
-            !empty(\XmlExportEngine::$exportOptions['wpml_lang']) &&
-            (\XmlExportEngine::$exportOptions['wpml_lang'] !== 'all');
     }
 }

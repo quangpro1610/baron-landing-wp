@@ -5,6 +5,7 @@
  * @package WordPress
  * @since 2.0.0
  */
+#[AllowDynamicProperties]
 class WP {
 	/**
 	 * Public query variables.
@@ -199,8 +200,7 @@ class WP {
 				$self     = trim( $self, '/' );
 			}
 
-			// The requested permalink is in $pathinfo for path info requests and
-			// $req_uri for other requests.
+			// The requested permalink is in $pathinfo for path info requests and $req_uri for other requests.
 			if ( ! empty( $pathinfo ) && ! preg_match( '|^.*' . $wp_rewrite->index . '$|', $pathinfo ) ) {
 				$requested_path = $pathinfo;
 			} else {
@@ -226,7 +226,7 @@ class WP {
 			} else {
 				foreach ( (array) $rewrite as $match => $query ) {
 					// If the requested file is the anchor of the match, prepend it to the path info.
-					if ( ! empty( $requested_file ) && strpos( $match, $requested_file ) === 0 && $requested_file != $requested_path ) {
+					if ( ! empty( $requested_file ) && str_starts_with( $match, $requested_file ) && $requested_file != $requested_path ) {
 						$request_match = $requested_file . '/' . $requested_path;
 					}
 
@@ -273,10 +273,10 @@ class WP {
 			}
 
 			// If req_uri is empty or if it is a request for ourself, unset error.
-			if ( empty( $requested_path ) || $requested_file == $self || strpos( $_SERVER['PHP_SELF'], 'wp-admin/' ) !== false ) {
+			if ( empty( $requested_path ) || $requested_file == $self || str_contains( $_SERVER['PHP_SELF'], 'wp-admin/' ) ) {
 				unset( $error, $_GET['error'] );
 
-				if ( isset( $perma_query_vars ) && strpos( $_SERVER['PHP_SELF'], 'wp-admin/' ) !== false ) {
+				if ( isset( $perma_query_vars ) && str_contains( $_SERVER['PHP_SELF'], 'wp-admin/' ) ) {
 					unset( $perma_query_vars );
 				}
 
@@ -407,9 +407,14 @@ class WP {
 	 * If showing a feed, it will also send Last-Modified, ETag, and 304 status if needed.
 	 *
 	 * @since 2.0.0
-	 * @since 4.4.0 `X-Pingback` header is added conditionally after posts have been queried in handle_404().
+	 * @since 4.4.0 `X-Pingback` header is added conditionally for single posts that allow pings.
+	 * @since 6.1.0 Runs after posts have been queried.
+	 *
+	 * @global WP_Query $wp_query WordPress Query object.
 	 */
 	public function send_headers() {
+		global $wp_query;
+
 		$headers       = array();
 		$status        = null;
 		$exit_required = false;
@@ -449,7 +454,7 @@ class WP {
 
 			// We're showing a feed, so WP is indeed the only thing that last changed.
 			if ( ! empty( $this->query_vars['withcomments'] )
-				|| false !== strpos( $this->query_vars['feed'], 'comments-' )
+				|| str_contains( $this->query_vars['feed'], 'comments-' )
 				|| ( empty( $this->query_vars['withoutcomments'] )
 					&& ( ! empty( $this->query_vars['p'] )
 						|| ! empty( $this->query_vars['name'] )
@@ -500,6 +505,15 @@ class WP {
 					( ( $client_modified_timestamp >= $wp_modified_timestamp ) || ( $client_etag == $wp_etag ) ) ) {
 				$status        = 304;
 				$exit_required = true;
+			}
+		}
+
+		if ( is_singular() ) {
+			$post = isset( $wp_query->post ) ? $wp_query->post : null;
+
+			// Only set X-Pingback for single posts that allow pings.
+			if ( $post && pings_open( $post ) ) {
+				$headers['X-Pingback'] = get_bloginfo( 'pingback_url', 'display' );
 			}
 		}
 
@@ -700,17 +714,12 @@ class WP {
 
 			if ( is_singular() ) {
 				$post = isset( $wp_query->post ) ? $wp_query->post : null;
-
-				// Only set X-Pingback for single posts that allow pings.
-				if ( $post && pings_open( $post ) && ! headers_sent() ) {
-					header( 'X-Pingback: ' . get_bloginfo( 'pingback_url', 'display' ) );
-				}
+				$next = '<!--nextpage-->';
 
 				// Check for paged content that exceeds the max number of pages.
-				$next = '<!--nextpage-->';
 				if ( $post && ! empty( $this->query_vars['page'] ) ) {
 					// Check if content is actually intended to be paged.
-					if ( false !== strpos( $post->post_content, $next ) ) {
+					if ( str_contains( $post->post_content, $next ) ) {
 						$page          = trim( $this->query_vars['page'], '/' );
 						$content_found = (int) $page <= ( substr_count( $post->post_content, $next ) + 1 );
 					} else {
@@ -769,13 +778,13 @@ class WP {
 
 		$parsed = $this->parse_request( $query_args );
 
-		$this->send_headers();
-
 		if ( $parsed ) {
 			$this->query_posts();
 			$this->handle_404();
 			$this->register_globals();
 		}
+
+		$this->send_headers();
 
 		/**
 		 * Fires once the WordPress environment has been set up.

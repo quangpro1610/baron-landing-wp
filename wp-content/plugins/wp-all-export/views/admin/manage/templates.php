@@ -11,5 +11,7 @@ if(!defined('ABSPATH')) {
 		<a class="button-primary" href='<?php echo esc_url(add_query_arg(array('id' => $item['id'], 'action' => 'get_template', '_wpnonce' => wp_create_nonce( '_wpnonce-download_template' )), $this->baseUrl));?>'>Download</a>
 	</p>
 	<img src="<?php echo PMXE_ROOT_URL; ?>/static/img/import-templates.png" width="400px" style="border: 1px solid #aaa;">
-	<a href="http://soflyy.com/" target="_blank" class="wpallexport-created-by"><?php esc_html_e('Created by', 'wp_all_export_plugin'); ?> <span></span></a>
+    <div class="wpallexport-display-columns wpallexport-margin-top-forty">
+		<?php echo apply_filters('wpallexport_footer', ''); ?>
+    </div>
 </div>

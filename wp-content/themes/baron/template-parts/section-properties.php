@@ -1,7 +1,7 @@
 <?php  
 	if(function_exists('cs_get_option')){
 		$properties_group = cs_get_option('properties_group');
-		$$property_item = '';
+		$property_item = '';
 		foreach ($properties_group as $key => $property) {
 			$attachment = wp_get_attachment_image_src( $property['image'], 'full' );
 			$property_image_url = $attachment[0];

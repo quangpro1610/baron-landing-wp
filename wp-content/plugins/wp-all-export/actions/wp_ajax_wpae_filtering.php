@@ -46,13 +46,13 @@ function pmxe_wp_ajax_wpae_filtering(){
 
 	$response['html'] = ob_get_clean();
 
-	if ( (XmlExportEngine::$is_user_export && $post['cpt'] != 'shop_customer' && !$addons->isUserAddonActive()) || XmlExportEngine::$is_comment_export || XmlExportEngine::$is_taxonomy_export || ($post['cpt'] == 'shop_customer' && (!$addons->isUserAddonActive() || PMUE_EDITION != 'paid')) )
+	if ( (XmlExportEngine::$is_user_export && (isset($post['cpt']) && $post['cpt'] != 'shop_customer') && !$addons->isUserAddonActive()) || XmlExportEngine::$is_comment_export || XmlExportEngine::$is_taxonomy_export || (isset($post['cpt']) && $post['cpt'] == 'shop_customer' && (!$addons->isUserAddonActive() || PMUE_EDITION != 'paid')) )
 	{
 		$response['btns'] = '';
 		exit(json_encode($response)); die;
 	}
 
-	$cpt = $post['cpt'];
+	$cpt = $post['cpt'] ?? '';
 
 	if(!is_array($cpt)) {
 	    $cpt =[$cpt];

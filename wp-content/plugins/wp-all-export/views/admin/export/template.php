@@ -620,6 +620,7 @@ if(!defined('ABSPATH')) {
                 </div>
 
             </fieldset>
+            <?php echo apply_filters('wpallexport_info_panel', ''); ?>
         </td>
     </tr>
 

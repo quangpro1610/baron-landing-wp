@@ -27,11 +27,11 @@
         $(function () {
 
             var $addAnotherForm = $('fieldset.wp-all-export-edit-column');
-            $addAnotherForm.click(function () {
+            $addAnotherForm.on('click', function () {
                 var rel = $addAnotherForm.attr('rel');
             });
 
-            $('select[name="column_value_type"]').change(function(){
+            $('select[name="column_value_type"]').on('change', function(){
                 $('.column_name').val($(this).find('option:selected').text());
             });
 
@@ -41,11 +41,11 @@
                 }
             });
 
-            $('.preview_action').unbind('click').click(function (event) {
+            $('.preview_action').off('click').on('click', function (event) {
                 return false;
             });
 
-            $('input[name="combine_multiple_fields"]').change(function () {
+            $('input[name="combine_multiple_fields"]').on('change', function () {
                 if ($(this).val() == '1') {
                     $('#combine_multiple_fields_value_container').slideDown();
                     $('#combine_multiple_fields_data').slideDown();

@@ -92,7 +92,7 @@ class ReviewLogic
 
     public function dismissNotice()
     {
-        if (current_user_can('manage_options')) {
+        if (current_user_can(\PMXE_Plugin::$capabilities)) {
             update_option('wpae_modal_review_dismissed', true, false);
             update_option('wpae_modal_review_dismissed_time', time(), false);
 

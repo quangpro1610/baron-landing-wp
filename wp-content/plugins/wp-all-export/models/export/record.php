@@ -16,7 +16,7 @@ class PMXE_Export_Record extends PMXE_Model_Record {
 	 *
 	 * @param callable[optional] $logger Method where progress messages are submmitted
 	 *
-	 * @return PMXE_Export_Record
+	 * @return PMXE_Export_Record|void
 	 * @chainable
 	 */
 	public function execute($logger = NULL, $cron = false) {

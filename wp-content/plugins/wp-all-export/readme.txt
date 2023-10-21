@@ -1,8 +1,8 @@
 === Export any WordPress data to XML/CSV ===
 Contributors: soflyy, wpallimport
 Requires at least: 5.0
-Tested up to: 6.0
-Stable tag: 1.3.7
+Tested up to: 6.3
+Stable tag: 1.4.0
 Tags: export, wordpress csv export, wordpress xml export, export woocommerce, migrate, export csv from wordpress, export xml from wordpress, advanced xml export, advanced csv export, export data, bulk csv export, export custom post type, export woocommerce products, export woocommerce orders, migrate woocommerce, csv export, export csv, xml export, export xml, csv exporter, datafeed
 
 Easily export any data from WordPress. Drag & drop to create a completely custom spreadsheet, CSV, or XML file.
@@ -85,6 +85,18 @@ If you want to set up a WordPress XML export all you need to do is select 'XML' 
 [Export Orders to CSV/XML for WooCommerce](https://wordpress.org/plugins/order-export-for-woocommerce/)
 [Export WordPress Users to CSV/XML](https://wordpress.org/plugins/export-wp-users-xml-csv/)
 
+= Related Tutorials =
+[How to Export WooCommerce Products to Google Merchant Center (Google Shopping)](https://www.wpallimport.com/documentation/how-to-export-woocommerce-products-to-google-merchant-center/)
+[How to Export Gravity Forms Entries](https://www.wpallimport.com/documentation/how-to-export-gravity-form-entries-to-csv-or-xml/)
+[Export Toolset Types to CSV, XML, or Excel](https://www.wpallimport.com/toolset-types-export-csv-xml/)
+[How to Export WooCommerce Variable Products](https://www.wpallimport.com/documentation/how-to-export-woocommerce-variable-products/)
+[How to Export Blogs, Articles, Posts, Standard Post Data, Permalinks, Excerpts, Captions, Menus, Subscriptions, and Other Details From Your Websites](https://www.wpallimport.com/documentation/export-wordpress-posts/)
+[How To Export WordPress Comments](https://www.wpallimport.com/documentation/export-wordpress-comments-csv-xml/)
+[How To Export WooCommerce Coupons](https://www.wpallimport.com/documentation/how-to-export-woocommerce-coupons-to-csv-or-xml/)
+[How To Export WooCommerce Reviews](https://www.wpallimport.com/documentation/how-to-export-woocommerce-reviews-to-csv-or-xml/)
+[How to Schedule Your Exports to Run Automatically](https://www.wpallimport.com/documentation/how-to-schedule-wordpress-exports/)
+[How to Migrate WooCommerce and WordPress From One Host to Another](https://www.wpallimport.com/documentation/how-to-migrate-woocommerce-and-wordpress-data/)
+
 == Premium Support ==
 Upgrade to the Pro edition of WP All Export for premium support.
 
@@ -97,7 +109,96 @@ Either: -
 * Upload the plugin from the Plugins page in WordPress
 * Unzip wp-all-export.zip and upload the contents to /wp-content/plugins/, and then activate the plugin from the Plugins page in WordPress
 
+== Frequently Asked Questions ==
+
+= How do I export WordPress data to CSV? =
+
+1. Go to All Export › New Export.
+2. Select the post type that you want to export.
+3. Configure the export columns.
+4. Leave the Export Type set to CSV File.
+5. Run the export and download the export file.
+
+= How do I export WordPress data to Excel? =
+
+1. Create a new export at All Export › New Export.
+2. Choose the post type that you wish to export.
+3. Select your export columns.
+4. Change the Export Type to Excel File.
+5. Complete the export and download the export file.
+
+= How do I export WordPress data to XML? =
+
+1. Start a new export in All Export › New Export.
+2. Select the export post type from the dropdown list.
+3. Set up your export columns.
+4. Change the Export Type to Feed › Simple XML Feed.
+5. Finish the export and download the export file.
+
+= How do I export an entire WordPress site? =
+
+By default, WordPress offers a native tool to export all WordPress data. To export a WordPress site entirely and manually, you can also export the WordPress database and then download the WordPress files from your server via SFTP or FTP.
+
+With our plugin, you can export the post types or custom post types available on your WordPress site, but you can't export your full site at once. You have to export one post type at a time.
+
+= How do I export WordPress media? =
+
+To export media from your WordPress site, you must export the post type or custom post type associated with the media that you wish to export. For example, if you have multiple images attached to posts, you need to export the WordPress posts to obtain those images.
+
+= What types of data can I export from WordPress? =
+
+You can export every type of data, including posts, pages, categories, tags, users, comments, custom data, images, and all types of WooCommerce data.
+
+= Can I export WordPress data in different languages? =
+
+Yes. You can export text in more than 40 languages when using the [WordPress Multilingual Plugin (WPML)](https://wordpress.org/plugins/woocommerce-multilingual/).
+
+= How do I schedule WordPress exports? =
+
+To schedule WordPress exports, you can either manually create cron jobs on your server or use our automatic service to schedule your exports directly from our interface.
+
+= Can I export custom WordPress data added by a plugin or extension? =
+
+Yes. Our plugin automatically detects all custom fields, categories, and tags created by any WordPress theme or plugin. You can export this custom data the same way that you export regular data.
+
+= How do I migrate WordPress data to another website? =
+
+1. Export the WordPress data that you want to migrate.
+2. Download the Bundle option, which includes import instructions.
+3. Import the bundle file on the destination site.
+4. WP All Import will automatically configure itself using the bundle file.
+5. Complete the import and review your migrated data.
+
+= How do I bulk edit WordPress data? =
+
+1. Export the WordPress data that you want to edit.
+2. Open the export file in your favorite spreadsheet app.
+3. Perform your bulk edits.
+4. Import the modified file back into WordPress.
+5. Review the affected data to make sure the changes were applied.
+
+= How do I get support? =
+
+If you are using the free version of the plugin, you can obtain support through the WordPress.org community forums. If you have purchased the premium version, you can email us directly and we will respond as quickly as we can, typically in less than one business day.
+
 == Changelog ==
+
+= 1.4.0 =
+*security improvement
+*improvement: better PHP 8.2 support
+*improvement: enable adding BOM to files by default for new exports and improve description
+*improvement: minimize code called during AJAX requests
+*improvement: remove 'wp_navigation' from dropdown on Step 1
+*improvement: add code to 'admin_head' only on WP All Export pages
+
+= 1.3.9 =
+* improvement: remove deprecated jQuery functions
+* bug fix: resolve various PHP notices and warnings
+* bug fix: error on Step 1 when 'Disable syntax highlighting when editing code' User option is enabled
+
+= 1.3.8 =
+* improvement: only contact Scheduling service if a Scheduling license is set
+* bug fix: enable use of 's', 'LIKE' and 'NOT LIKE' in WP_Query exports
 
 = 1.3.7 =
 * bug fix: cannot save Scheduling service license key
